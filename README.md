@@ -18,6 +18,7 @@ This repo contains some basic cuda examples described below:
     Time on CPU (ms):
     Overall speedup =
 ```
+How to compile:
 nvcc **.cu -o a.out
 ./a.out $row_a $col_a $col_b
 ```
