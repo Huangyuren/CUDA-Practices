@@ -10,13 +10,13 @@ This repo contains some basic cuda examples described below:
 * RAM: HyperX fury DDR4 3766MHz
 ## vector_mult_2D.cu -- Matrix multiplication benchmark
 1. **matrix_A**: 1024 * 1024, **matrix_B**: 1024 * 1024
-    Time on GPU (ms): 903456
-    Time on CPU (ms): 3574.231689
-    Overall speedup = 1231.02661
+    * Time on GPU (ms): 903456
+    * Time on CPU (ms): 3574.231689
+    * Overall speedup = 1231.02661
 2. **matrix_A**: 8192 * 8192, **matrix_B**: 8192 * 8192
-    Time on GPU (ms):
-    Time on CPU (ms):
-    Overall speedup =
+    * Time on GPU (ms): 720.784180
+    * Time on CPU (ms): 6992006.500000
+    * Overall speedup = 9700.554688
 ```
 How to compile:
 nvcc **.cu -o a.out
