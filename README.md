@@ -10,10 +10,14 @@ This repo contains some basic cuda examples described below:
 * RAM: DDR4 3766MHz 16GB
 ## vector_mult_2D.cu -- Matrix multiplication benchmark
 1. **matrix_A**: 1024 * 1024, **matrix_B**: 1024 * 1024
-    * Time on GPU (ms): 2.903456
-    * Time on CPU (ms): 3574.231689
-    * Overall speedup = 1231.02661
-2. **matrix_A**: 8192 * 8192, **matrix_B**: 8192 * 8192
+    * Time on GPU (ms): 2.936768
+    * Time on CPU (ms): 1964.278809
+    * Overall speedup = 668.857300
+2. **matrix_A**: 4096 * 4096, **matrix_B**: 4096 * 4096
+    * Time on GPU (ms): 126.989983
+    * Time on CPU (ms): 130397.976562
+    * Overall speedup = 1026.836670
+3. **matrix_A**: 8192 * 8192, **matrix_B**: 8192 * 8192
     * Time on GPU (ms): 720.784180
     * Time on CPU (ms): 6992006.500000
     * Overall speedup = 9700.554688
