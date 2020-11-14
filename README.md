@@ -7,10 +7,10 @@ This repo contains some basic cuda examples described below:
 * OS: Ubuntu 18.04 LTS
 * CPU: Intel i7-9700K
 * GPU: NVIDIA GeForce RTX 2080Ti
-* RAM: HyperX fury DDR4 3766MHz
+* RAM: DDR4 3766MHz 16GB
 ## vector_mult_2D.cu -- Matrix multiplication benchmark
 1. **matrix_A**: 1024 * 1024, **matrix_B**: 1024 * 1024
-    * Time on GPU (ms): 903456
+    * Time on GPU (ms): 2.903456
     * Time on CPU (ms): 3574.231689
     * Overall speedup = 1231.02661
 2. **matrix_A**: 8192 * 8192, **matrix_B**: 8192 * 8192
