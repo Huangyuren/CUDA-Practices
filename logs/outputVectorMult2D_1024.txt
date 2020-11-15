@@ -1,0 +1,9 @@
+Device ID: 0
+Number of SMs: 68
+Compute Capability Major: 7
+Compute Capability Minor: 5
+Warp Size: 32
+Time elapsed on matrix multiplication of 1024x1024 . 1024x1024 on GPU: 2.911136 ms.
+Time elapsed on matrix multiplication of 1024x1024 . 1024x1024 on CPU: 1877.287354 ms.
+Congratulations, results match !!
+Overall speedup = 644.864197

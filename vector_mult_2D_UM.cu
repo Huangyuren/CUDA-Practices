@@ -3,13 +3,6 @@
 #include <assert.h>
 
 #define BLOCK_SIZE 32
-#define cudaCheckError() {                  \
-    cudaError_t e = cudaGetLastError();     \
-    if (e != cudaSuccess) {                 \
-        printf("CUDA Failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e)); \
-        exit(EXIT_FAILURE);                 \
-    }                                       \
-}
 
 inline cudaError_t cudaCheckError_inline(cudaError_t result) {
 	if (result != cudaSuccess) {
@@ -93,11 +86,12 @@ int main(int argc, char* argv[]) {
 
 	int* h_a, *h_b, *h_c, *h_c_result;
     int* h_b_trans;
-	cudaCheckError_inline(cudaMallocHost((void **) &h_a, sizeof(int)*(row_a*col_a)));
-	cudaCheckError_inline(cudaMallocHost((void **) &h_b, sizeof(int)*(col_a*col_b)));
-	cudaCheckError_inline(cudaMallocHost((void **) &h_c, sizeof(int)*(row_a*col_b)));
-    cudaCheckError_inline(cudaMallocHost((void **) &h_c_result, sizeof(int)*(row_a*col_b)));
-	cudaCheckError_inline(cudaMallocHost((void **) &h_b_trans, sizeof(int)*(col_a*col_b)));
+    cudaCheckError_inline(cudaMallocManaged(&h_a, sizeof(int)*row_a*col_a));
+    cudaCheckError_inline(cudaMallocManaged(&h_b, sizeof(int)*col_a*col_b));
+    cudaCheckError_inline(cudaMallocManaged(&h_b_trans, sizeof(int)*col_a*col_b));
+    cudaCheckError_inline(cudaMallocManaged(&h_c, sizeof(int)*row_a*col_b));
+    cudaCheckError_inline(cudaMallocManaged(&h_c_result, sizeof(int)*row_a*col_b));
+
     //Random initialized matrix a on host
     for(int i=0; i<row_a; ++i) {
         for(int j=0; j<col_a; ++j) {
@@ -110,6 +104,10 @@ int main(int argc, char* argv[]) {
             h_b[i*col_b+j] = rand() % 1024;
         }
     }
+    cudaCheckError_inline(cudaMemPrefetchAsync(h_a, sizeof(int)*row_a*col_a, deviceId));
+    cudaCheckError_inline(cudaMemPrefetchAsync(h_b, sizeof(int)*col_a*col_b, deviceId));
+    cudaCheckError_inline(cudaMemPrefetchAsync(h_c, sizeof(int)*row_a*col_b, deviceId));
+
 
     float gpu_elapsed_time_ms, cpu_elapsed_time_ms;
 	cudaEvent_t start, stop;
@@ -117,39 +115,22 @@ int main(int argc, char* argv[]) {
     cudaEventCreate(&stop);
     // Start counting execution time of device computation
     cudaEventRecord(start, 0);
-	int* dev_a, *dev_b, *dev_c;
-    //int* dev_b_trans;
-	cudaCheckError_inline(cudaMalloc((void **) &dev_a, sizeof(int)*(row_a*col_a)));
-	cudaCheckError_inline(cudaMalloc((void **) &dev_b, sizeof(int)*(col_a*col_b)));
-	cudaCheckError_inline(cudaMalloc((void **) &dev_c, sizeof(int)*(row_a*col_b)));
-	//cudaCheckError_inline(cudaMalloc((void **) &dev_b_trans, sizeof(int)*(col_a*col_b)));
-
-	cudaCheckError_inline(cudaMemcpy(dev_a, h_a, sizeof(int)*(row_a*col_a), cudaMemcpyHostToDevice));
-	cudaCheckError_inline(cudaMemcpy(dev_b, h_b, sizeof(int)*(col_a*col_b), cudaMemcpyHostToDevice));
 
     int grid_row = (row_a + BLOCK_SIZE - 1) / BLOCK_SIZE;
     int grid_col = (col_b + BLOCK_SIZE - 1) / BLOCK_SIZE;
 	dim3 dimGrid(grid_col, grid_row);
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-    //First we perform matrix transpose
-    //matrixTranspose<<<dimGrid, dimBlock>>>(dev_b, dev_b_trans, col_a, col_b);
-    //cudaCheckError_inline(cudaDeviceSynchronize());
-    //Then we perform multiplication on transposed matrix
-	//matrixMultiplication<<<dimGrid, dimBlock>>>(dev_a, dev_b_trans, dev_c, row_a, col_a, col_b);
-    matrixMultiplication<<<dimGrid, dimBlock>>>(dev_a, dev_b, dev_c, row_a, col_a, col_b);
+    matrixMultiplication<<<dimGrid, dimBlock>>>(h_a, h_b, h_c, row_a, col_a, col_b);
     cudaCheckError_inline(cudaDeviceSynchronize());
-    cudaCheckError_inline(cudaMemcpy(h_c_result, dev_c, sizeof(int)*row_a*col_b, cudaMemcpyDeviceToHost));
-    
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&gpu_elapsed_time_ms, start, stop);
     printf("Time elapsed on matrix multiplication of %dx%d . %dx%d on GPU: %f ms.\n", row_a, col_a, col_a, col_b, gpu_elapsed_time_ms);
 
-    
     //Start counting execution time of cpu computation
     matrixTranspose_cpu(h_b, h_b_trans, col_a, col_b);
     cudaEventRecord(start, 0);
-    matrixMultiplication_cpu(h_a, h_b_trans, h_c, row_a, col_a, col_b);
+    matrixMultiplication_cpu(h_a, h_b_trans, h_c_result, row_a, col_a, col_b);
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&cpu_elapsed_time_ms, start, stop);
@@ -165,13 +146,7 @@ int main(int argc, char* argv[]) {
     printf("Overall speedup = %f\n", speedups);
     
 
-    cudaCheckError_inline(cudaFree(dev_a));
-    cudaCheckError_inline(cudaFree(dev_b));
-    cudaCheckError_inline(cudaFree(dev_c));
-
-    cudaCheckError_inline(cudaFreeHost(h_a));
-    cudaCheckError_inline(cudaFreeHost(h_b));
-    cudaCheckError_inline(cudaFreeHost(h_c));
-    cudaCheckError_inline(cudaFreeHost(h_c_result));
-
+    cudaCheckError_inline(cudaFree(h_a));
+    cudaCheckError_inline(cudaFree(h_b));
+    cudaCheckError_inline(cudaFree(h_c));
 }

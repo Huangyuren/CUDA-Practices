@@ -1,0 +1,4 @@
+Time elapsed on matrix multiplication of 4096x4096 . 4096x4096 on GPU: 126.989983 ms.
+Time elapsed on matrix multiplication of 4096x4096 . 4096x4096 on CPU: 130397.976562 ms.
+Congratulations, results match !!
+Overall speedup = 1026.836670
