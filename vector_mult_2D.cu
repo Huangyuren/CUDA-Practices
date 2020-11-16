@@ -80,24 +80,21 @@ int main(int argc, char* argv[]) {
 	int row_a = atoi(argv[1]);
 	int col_a = atoi(argv[2]);
 	int col_b = atoi(argv[3]);
-    int deviceId;
-    cudaGetDevice(&deviceId);
-    cudaDeviceProp props;
-    cudaGetDeviceProperties(&props, deviceId);
-    int computeCapabilityMajor = props.major;
-    int computeCapabilityMinor = props.minor;
-    int multiProcessorCount = props.multiProcessorCount;
-    int warpSize = props.warpSize;
-    printf("Device ID: %d\nNumber of SMs: %d\nCompute Capability Major: %d\nCompute Capability Minor: %d\nWarp Size: %d\n", \
-            deviceId, multiProcessorCount, computeCapabilityMajor, computeCapabilityMinor, warpSize);
 
-	int* h_a, *h_b, *h_c, *h_c_result;
-    int* h_b_trans;
+    float gpu_elapsed_time_ms;
+    //float cpu_elapsed_time_ms;
+	cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    // Start counting execution time of device computation
+    cudaEventRecord(start, 0);
+	int* h_a, *h_b, *h_c_result;
+    //int* h_b_trans, *h_c;
 	cudaCheckError_inline(cudaMallocHost((void **) &h_a, sizeof(int)*(row_a*col_a)));
 	cudaCheckError_inline(cudaMallocHost((void **) &h_b, sizeof(int)*(col_a*col_b)));
-	cudaCheckError_inline(cudaMallocHost((void **) &h_c, sizeof(int)*(row_a*col_b)));
+	//cudaCheckError_inline(cudaMallocHost((void **) &h_c, sizeof(int)*(row_a*col_b)));
     cudaCheckError_inline(cudaMallocHost((void **) &h_c_result, sizeof(int)*(row_a*col_b)));
-	cudaCheckError_inline(cudaMallocHost((void **) &h_b_trans, sizeof(int)*(col_a*col_b)));
+	//cudaCheckError_inline(cudaMallocHost((void **) &h_b_trans, sizeof(int)*(col_a*col_b)));
     //Random initialized matrix a on host
     for(int i=0; i<row_a; ++i) {
         for(int j=0; j<col_a; ++j) {
@@ -111,12 +108,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    float gpu_elapsed_time_ms, cpu_elapsed_time_ms;
-	cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-    // Start counting execution time of device computation
-    cudaEventRecord(start, 0);
 	int* dev_a, *dev_b, *dev_c;
     //int* dev_b_trans;
 	cudaCheckError_inline(cudaMalloc((void **) &dev_a, sizeof(int)*(row_a*col_a)));
@@ -131,11 +122,13 @@ int main(int argc, char* argv[]) {
     int grid_col = (col_b + BLOCK_SIZE - 1) / BLOCK_SIZE;
 	dim3 dimGrid(grid_col, grid_row);
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
+    /*
     //First we perform matrix transpose
-    //matrixTranspose<<<dimGrid, dimBlock>>>(dev_b, dev_b_trans, col_a, col_b);
-    //cudaCheckError_inline(cudaDeviceSynchronize());
+    matrixTranspose<<<dimGrid, dimBlock>>>(dev_b, dev_b_trans, col_a, col_b);
+    cudaCheckError_inline(cudaDeviceSynchronize());
     //Then we perform multiplication on transposed matrix
-	//matrixMultiplication<<<dimGrid, dimBlock>>>(dev_a, dev_b_trans, dev_c, row_a, col_a, col_b);
+	matrixMultiplication<<<dimGrid, dimBlock>>>(dev_a, dev_b_trans, dev_c, row_a, col_a, col_b);
+    */
     matrixMultiplication<<<dimGrid, dimBlock>>>(dev_a, dev_b, dev_c, row_a, col_a, col_b);
     cudaCheckError_inline(cudaDeviceSynchronize());
     cudaCheckError_inline(cudaMemcpy(h_c_result, dev_c, sizeof(int)*row_a*col_b, cudaMemcpyDeviceToHost));
@@ -145,7 +138,7 @@ int main(int argc, char* argv[]) {
     cudaEventElapsedTime(&gpu_elapsed_time_ms, start, stop);
     printf("Time elapsed on matrix multiplication of %dx%d . %dx%d on GPU: %f ms.\n", row_a, col_a, col_a, col_b, gpu_elapsed_time_ms);
 
-    
+    /*
     //Start counting execution time of cpu computation
     matrixTranspose_cpu(h_b, h_b_trans, col_a, col_b);
     cudaEventRecord(start, 0);
@@ -163,7 +156,7 @@ int main(int argc, char* argv[]) {
     }
     float speedups = cpu_elapsed_time_ms / gpu_elapsed_time_ms;
     printf("Overall speedup = %f\n", speedups);
-    
+    */
 
     cudaCheckError_inline(cudaFree(dev_a));
     cudaCheckError_inline(cudaFree(dev_b));
@@ -171,7 +164,7 @@ int main(int argc, char* argv[]) {
 
     cudaCheckError_inline(cudaFreeHost(h_a));
     cudaCheckError_inline(cudaFreeHost(h_b));
-    cudaCheckError_inline(cudaFreeHost(h_c));
+    //cudaCheckError_inline(cudaFreeHost(h_c));
     cudaCheckError_inline(cudaFreeHost(h_c_result));
 
 }

@@ -73,22 +73,22 @@ int main(int argc, char* argv[]) {
 	int row_a = atoi(argv[1]);
 	int col_a = atoi(argv[2]);
 	int col_b = atoi(argv[3]);
+
     int deviceId;
     cudaGetDevice(&deviceId);
-    cudaDeviceProp props;
-    cudaGetDeviceProperties(&props, deviceId);
-    int computeCapabilityMajor = props.major;
-    int computeCapabilityMinor = props.minor;
-    int multiProcessorCount = props.multiProcessorCount;
-    int warpSize = props.warpSize;
-    printf("Device ID: %d\nNumber of SMs: %d\nCompute Capability Major: %d\nCompute Capability Minor: %d\nWarp Size: %d\n", \
-            deviceId, multiProcessorCount, computeCapabilityMajor, computeCapabilityMinor, warpSize);
+    float gpu_elapsed_time_ms;
+    //float cpu_elapsed_time_ms;
+	cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    // Start counting execution time of device computation
+    cudaEventRecord(start, 0);
 
 	int* h_a, *h_b, *h_c, *h_c_result;
-    int* h_b_trans;
+    //int* h_b_trans;
     cudaCheckError_inline(cudaMallocManaged(&h_a, sizeof(int)*row_a*col_a));
     cudaCheckError_inline(cudaMallocManaged(&h_b, sizeof(int)*col_a*col_b));
-    cudaCheckError_inline(cudaMallocManaged(&h_b_trans, sizeof(int)*col_a*col_b));
+    //cudaCheckError_inline(cudaMallocManaged(&h_b_trans, sizeof(int)*col_a*col_b));
     cudaCheckError_inline(cudaMallocManaged(&h_c, sizeof(int)*row_a*col_b));
     cudaCheckError_inline(cudaMallocManaged(&h_c_result, sizeof(int)*row_a*col_b));
 
@@ -108,14 +108,6 @@ int main(int argc, char* argv[]) {
     cudaCheckError_inline(cudaMemPrefetchAsync(h_b, sizeof(int)*col_a*col_b, deviceId));
     cudaCheckError_inline(cudaMemPrefetchAsync(h_c, sizeof(int)*row_a*col_b, deviceId));
 
-
-    float gpu_elapsed_time_ms, cpu_elapsed_time_ms;
-	cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-    // Start counting execution time of device computation
-    cudaEventRecord(start, 0);
-
     int grid_row = (row_a + BLOCK_SIZE - 1) / BLOCK_SIZE;
     int grid_col = (col_b + BLOCK_SIZE - 1) / BLOCK_SIZE;
 	dim3 dimGrid(grid_col, grid_row);
@@ -127,6 +119,7 @@ int main(int argc, char* argv[]) {
     cudaEventElapsedTime(&gpu_elapsed_time_ms, start, stop);
     printf("Time elapsed on matrix multiplication of %dx%d . %dx%d on GPU: %f ms.\n", row_a, col_a, col_a, col_b, gpu_elapsed_time_ms);
 
+    /*
     //Start counting execution time of cpu computation
     matrixTranspose_cpu(h_b, h_b_trans, col_a, col_b);
     cudaEventRecord(start, 0);
@@ -144,7 +137,7 @@ int main(int argc, char* argv[]) {
     }
     float speedups = cpu_elapsed_time_ms / gpu_elapsed_time_ms;
     printf("Overall speedup = %f\n", speedups);
-    
+    */
 
     cudaCheckError_inline(cudaFree(h_a));
     cudaCheckError_inline(cudaFree(h_b));

@@ -1,0 +1,18 @@
+Device ID: 0
+Number of SMs: 68
+Compute Capability Major: 7
+Compute Capability Minor: 5
+Warp Size: 32
+Start normal matrix multiplication process.
+Time elapsed on matrix multiplication of 1024x1024 . 1024x1024 on GPU: 31.672289 ms.
+Time elapsed on matrix multiplication of 2048x2048 . 2048x2048 on GPU: 133.229599 ms.
+Time elapsed on matrix multiplication of 4096x4096 . 4096x4096 on GPU: 586.336914 ms.
+Time elapsed on matrix multiplication of 8192x8192 . 8192x8192 on GPU: 2628.969971 ms.
+Time elapsed on matrix multiplication of 16384x16384 . 16384x16384 on GPU: 13398.737305 ms.
+Start unified memory with prefetcher process.
+Time elapsed on matrix multiplication of 1024x1024 . 1024x1024 on GPU: 29.952415 ms.
+Time elapsed on matrix multiplication of 2048x2048 . 2048x2048 on GPU: 122.984543 ms.
+Time elapsed on matrix multiplication of 4096x4096 . 4096x4096 on GPU: 638.048523 ms.
+Time elapsed on matrix multiplication of 8192x8192 . 8192x8192 on GPU: 2542.854004 ms.
+Time elapsed on matrix multiplication of 16384x16384 . 16384x16384 on GPU: 12831.206055 ms.
+Time elapsed on matrix multiplication of 32768x32768 . 32768x32768 on GPU: 77526.773438 ms.
