@@ -95,10 +95,8 @@ int main(int argc, char* argv[]) {
     cudaEventRecord(start, 0);
 
 	int* h_a, *h_b, *h_c, *h_c_result;
-    //int* h_b_trans;
     cudaCheckError_inline(cudaMallocManaged(&h_a, sizeof(int)*row_a*col_a));
     cudaCheckError_inline(cudaMallocManaged(&h_b, sizeof(int)*col_a*col_b));
-    //cudaCheckError_inline(cudaMallocManaged(&h_b_trans, sizeof(int)*col_a*col_b));
     cudaCheckError_inline(cudaMallocManaged(&h_c, sizeof(int)*row_a*col_b));
     cudaCheckError_inline(cudaMallocManaged(&h_c_result, sizeof(int)*row_a*col_b));
 
@@ -131,9 +129,8 @@ int main(int argc, char* argv[]) {
 
     /*
     //Start counting execution time of cpu computation
-    matrixTranspose_cpu(h_b, h_b_trans, col_a, col_b);
     cudaEventRecord(start, 0);
-    matrixMultiplication_cpu(h_a, h_b_trans, h_c_result, row_a, col_a, col_b);
+    matrixMultiplication_cpu(h_a, h_b, h_c_result, row_a, col_a, col_b);
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&cpu_elapsed_time_ms, start, stop);
