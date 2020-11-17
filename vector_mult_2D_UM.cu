@@ -53,6 +53,16 @@ void matrixMultiplication_cpu(int* host_a, int* host_b, int* host_c, int row_a, 
         }
     }
 }
+void matrixMultiplication_cpu_cache_friendly(int* host_a, int* host_b, int* host_c, int row_a, int col_a, int col_b) {
+    for (int i=0; i<row_a; ++i) {
+        for(int k=0; k<col_a; ++k) {
+            int tmp = host_a[i*col_a + k];
+            for(int j=0; j<col_b; ++j) {
+                host_c[i*col_b+j] += tmp * host_b[k*col_b+j];
+            }
+        }
+    }
+}
 bool verifyResult(int* h_c, int* h_c_result, int rows, int cols) {
     for(int i=0; i<rows; ++i) {
         for(int j=0; j<cols; ++j) {
