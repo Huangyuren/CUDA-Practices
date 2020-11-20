@@ -21,8 +21,21 @@ This repo contains some basic cuda examples described below:
     * Time on GPU (ms): 720.784180
     * Time on CPU (ms): 6992006.500000
     * Overall speedup = 9700.554688
+## Additional results -- Unified memory
+> Tips: Unified memory would treat GPU memory and CPU memory as one entity, though that is on software point. NVIDIA did prefetching and on-demand paging to boost performance and fully utilize benefits of paged memory.
+> For more information, please refer to [this link](https://developer.nvidia.com/blog/unified-memory-cuda-beginners/)
+* Result: 
+    * Three mode
+        * normal: programmer explicitly specified cudaMalloc & cudaMemcpy
+        * Unified memory: managed memory
+        * Unified + prefetch: plus explicitly prefetching pages of data
+    * X-axis stands for square matrix rows/cols, which is {1, 2, 4, 8, 16, 32} $\times$ 1024
+    * Y-axis stands for runtime normalized to normal case
+    * Matrix of 32 $\times$ 1024 is too large for GPU, so I normalized runtime to Unified memory's runtime
+* ![](https://i.imgur.com/6sAQezt.png)
 ```
 How to compile:
 nvcc **.cu -o a.out
+Run:
 ./a.out $row_a $col_a $col_b
 ```
