@@ -24,5 +24,5 @@ for i, item in enumerate(binslst):
 columns = ["X", "normal", "Unified", "Unified/Prefetch"]
 df_out = pd.DataFrame(data=formatted_arr, columns=columns)
 
-df_out.plot(x = "X", y = ["normal", "Unified", "Unified/Prefetch"], kind="bar")
+df_out.plot(x = "X", y = list(set(df_out.columns) - set("X")), kind="bar", stacked=True)
 plt.show()
